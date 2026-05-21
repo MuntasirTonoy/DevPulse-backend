@@ -1,10 +1,5 @@
 import { pool } from './db';
 
-/**
- * Tests the database connection by acquiring a client from the pool
- * and running a simple SELECT 1 health-check query.
- * Exits the process with code 1 on failure.
- */
 export const testDatabaseConnection = async (): Promise<void> => {
   const client = await pool.connect();
   try {

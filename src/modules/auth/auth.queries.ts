@@ -1,4 +1,3 @@
-/** All raw SQL for the auth module in one place */
 export const AUTH_QUERIES = {
   FIND_USER_BY_EMAIL: `
     SELECT id, name, email, password, role, created_at, updated_at

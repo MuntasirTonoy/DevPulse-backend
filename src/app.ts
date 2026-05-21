@@ -7,16 +7,13 @@ import { AuthRoutes } from './modules/auth/auth.route';
 
 const app: Application = express();
 
-// ── Middleware ──────────────────────────────────────────────
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ── Routes ──────────────────────────────────────────────────
 app.use('/api/v1/health', HealthRoutes);
 app.use('/api/auth', AuthRoutes);
 
-// ── 404 Handler ─────────────────────────────────────────────
 app.use((req: Request, res: Response) => {
   res.status(StatusCodes.NOT_FOUND).json({
     success: false,
@@ -24,7 +21,6 @@ app.use((req: Request, res: Response) => {
   });
 });
 
-// ── Global Error Handler ─────────────────────────────────────
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof AppError) {
@@ -35,7 +31,6 @@ app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
     return;
   }
 
-  // Unexpected / non-operational error
   console.error('[Unhandled Error]', err);
   res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
     success: false,

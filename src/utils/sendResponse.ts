@@ -6,15 +6,6 @@ interface IApiResponse<T> {
   data?: T;
 }
 
-/**
- * Sends a standardized JSON API response.
- *
- * @param res        - Express Response object.
- * @param statusCode - HTTP status code.
- * @param success    - Whether the operation succeeded.
- * @param message    - Human-readable message.
- * @param data       - Optional payload to include in the response.
- */
 export const sendResponse = <T>(
   res: Response,
   statusCode: number,
