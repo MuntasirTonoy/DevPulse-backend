@@ -1,17 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
 import { verifyToken } from '../utils/jwt.util';
+import { AppError } from '../errors/AppError';
+import { ERROR_MESSAGES } from '../constants/error.constants';
 
-export const authenticate = (req: Request, res: Response, next: NextFunction): void => {
+export const authenticate = (req: Request, _res: Response, next: NextFunction): void => {
   const token = req.headers['authorization'];
 
   if (!token || typeof token !== 'string' || token.trim() === '') {
-    res.status(StatusCodes.UNAUTHORIZED).json({
-      success: false,
-      message: 'Access denied. No token provided.',
-    });
-    return;
+    return next(new AppError(ERROR_MESSAGES.UNAUTHORIZED, StatusCodes.UNAUTHORIZED));
   }
 
   try {
@@ -23,17 +20,6 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
     };
     next();
   } catch (err) {
-    if (err instanceof jwt.TokenExpiredError) {
-      res.status(StatusCodes.UNAUTHORIZED).json({
-        success: false,
-        message: 'Token has expired. Please log in again.',
-      });
-      return;
-    }
-
-    res.status(StatusCodes.UNAUTHORIZED).json({
-      success: false,
-      message: 'Invalid token. Access denied.',
-    });
+    next(err);
   }
 };
