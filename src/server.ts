@@ -6,7 +6,7 @@ dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 
-async function bootstrap() {
+async function startServer() {
   try {
     await testDatabaseConnection();
 
@@ -19,5 +19,4 @@ async function bootstrap() {
   }
 }
 
-bootstrap();
-
+startServer();

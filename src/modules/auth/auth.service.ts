@@ -34,7 +34,7 @@ export const signupUser = async (input: ICreateUserInput): Promise<IUserPublic> 
     role,
   ]);
 
-  return result.rows[0];
+  return result.rows[0]!;
 };
 
 /**
@@ -53,7 +53,7 @@ export const loginUser = async (input: ILoginInput): Promise<ILoginResponse> => 
     throw new AppError('Invalid email or password', StatusCodes.UNAUTHORIZED);
   }
 
-  const user = result.rows[0];
+  const user = result.rows[0]!;
 
   // Step 2 — Compare password
   const isMatch = await bcrypt.compare(password, user.password);

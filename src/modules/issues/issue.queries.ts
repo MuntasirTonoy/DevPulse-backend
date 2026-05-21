@@ -24,4 +24,9 @@ export const ISSUE_QUERIES = {
     FROM users
     WHERE id = ANY($1)
   `,
+
+  DELETE_ISSUE: `
+    DELETE FROM issues
+    WHERE id = $1
+  `,
 } as const;

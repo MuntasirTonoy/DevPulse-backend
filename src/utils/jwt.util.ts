@@ -7,10 +7,11 @@ const getSecret = (): string => {
   return secret;
 };
 
-const JWT_EXPIRES_IN: SignOptions['expiresIn'] = (process.env.JWT_EXPIRES_IN ?? '1d') as SignOptions['expiresIn'];
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN ?? '1d';
 
 export const signToken = (payload: IJwtPayload): string => {
-  return jwt.sign(payload, getSecret(), { expiresIn: JWT_EXPIRES_IN });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return jwt.sign(payload, getSecret(), { expiresIn: JWT_EXPIRES_IN as any });
 };
 
 export const verifyToken = (token: string): IJwtPayload => {

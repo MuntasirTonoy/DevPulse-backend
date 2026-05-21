@@ -22,7 +22,7 @@ export const createIssue = async (input: ICreateIssueInput): Promise<IIssue> => 
     reporter_id,
   ]);
 
-  return result.rows[0];
+  return result.rows[0]!;
 };
 
 export const getAllIssues = async (params: IGetIssuesQueryParams): Promise<IIssueWithReporter[]> => {
@@ -81,7 +81,7 @@ export const getIssueById = async (id: number): Promise<IIssueWithReporter> => {
     throw new AppError('Issue not found', StatusCodes.NOT_FOUND);
   }
 
-  const issue = issueResult.rows[0];
+  const issue = issueResult.rows[0]!;
 
   const reporterResult = await query<IReporterPublic>(ISSUE_QUERIES.GET_REPORTER_BY_ID, [
     issue.reporter_id,
@@ -89,7 +89,17 @@ export const getIssueById = async (id: number): Promise<IIssueWithReporter> => {
 
   const reporter = reporterResult.rows[0] ?? null;
 
-  return { ...issue, reporter };
+  return {
+    id: issue.id,
+    title: issue.title,
+    description: issue.description,
+    type: issue.type,
+    status: issue.status,
+    reporter_id: issue.reporter_id,
+    created_at: issue.created_at,
+    updated_at: issue.updated_at,
+    reporter,
+  };
 };
 
 export const updateIssue = async (
@@ -103,7 +113,7 @@ export const updateIssue = async (
     throw new AppError('Issue not found', StatusCodes.NOT_FOUND);
   }
 
-  const issue = issueResult.rows[0];
+  const issue = issueResult.rows[0]!;
 
   if (requestingUser.role === 'contributor') {
     if (issue.reporter_id !== requestingUser.id) {
@@ -151,7 +161,7 @@ export const updateIssue = async (
   `;
 
   const updateResult = await query<IIssue>(updateSql, params);
-  const updatedIssue = updateResult.rows[0];
+  const updatedIssue = updateResult.rows[0]!;
 
   const reporterResult = await query<IReporterPublic>(ISSUE_QUERIES.GET_REPORTER_BY_ID, [
     updatedIssue.reporter_id,
@@ -159,5 +169,33 @@ export const updateIssue = async (
 
   const reporter = reporterResult.rows[0] ?? null;
 
-  return { ...updatedIssue, reporter };
+  return {
+    id: updatedIssue.id,
+    title: updatedIssue.title,
+    description: updatedIssue.description,
+    type: updatedIssue.type,
+    status: updatedIssue.status,
+    reporter_id: updatedIssue.reporter_id,
+    created_at: updatedIssue.created_at,
+    updated_at: updatedIssue.updated_at,
+    reporter,
+  };
+};
+
+export const deleteIssue = async (id: number, requestingUser: IAuthUser): Promise<void> => {
+  const issueResult = await query<IIssue>(ISSUE_QUERIES.GET_ISSUE_BY_ID, [id]);
+
+  if ((issueResult.rowCount ?? 0) === 0) {
+    throw new AppError('Issue not found', StatusCodes.NOT_FOUND);
+  }
+
+  const issue = issueResult.rows[0]!;
+
+  if (requestingUser.role === 'contributor') {
+    if (issue.reporter_id !== requestingUser.id) {
+      throw new AppError('You are not allowed to delete this issue', StatusCodes.FORBIDDEN);
+    }
+  }
+
+  await query(ISSUE_QUERIES.DELETE_ISSUE, [id]);
 };

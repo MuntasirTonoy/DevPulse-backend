@@ -9,7 +9,7 @@ import {
   validateUpdateIssueInput,
   sanitizeUpdateIssueInput,
 } from './issue.validation';
-import { createIssue, getAllIssues, getIssueById, updateIssue } from './issue.service';
+import { createIssue, getAllIssues, getIssueById, updateIssue, deleteIssue } from './issue.service';
 import { sendResponse } from '../../utils/sendResponse';
 import { AppError } from '../../errors/AppError';
 import { IIssue, IIssueWithReporter } from '../../interfaces/issue.interface';
@@ -66,4 +66,17 @@ const update = catchAsync(async (req: Request, res: Response, _next: NextFunctio
   sendResponse<IIssueWithReporter>(res, StatusCodes.OK, true, 'Issue updated successfully', updatedIssue);
 });
 
-export const IssueController = { create, getAll, getOne, update };
+const deleteOne = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
+  const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const id = parseNumericId(rawId ?? '');
+  if (id === null) {
+    throw new AppError('Issue ID must be a positive integer', StatusCodes.BAD_REQUEST);
+  }
+
+  const requestingUser = req.user as IAuthUser;
+  await deleteIssue(id, requestingUser);
+
+  sendResponse<null>(res, StatusCodes.OK, true, 'Issue deleted successfully');
+});
+
+export const IssueController = { create, getAll, getOne, update, deleteOne };
