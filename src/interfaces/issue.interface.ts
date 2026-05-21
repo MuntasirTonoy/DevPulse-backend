@@ -18,6 +18,12 @@ export interface ICreateIssueInput {
   reporter_id: number;
 }
 
+export interface IUpdateIssueInput {
+  title?: string;
+  description?: string;
+  type?: IssueType;
+}
+
 export interface IReporterPublic {
   id: number;
   name: string;

@@ -1,10 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { validateCreateIssueInput, sanitizeCreateIssueInput, parseGetIssuesQueryParams, parseNumericId } from './issue.validation';
-import { createIssue, getAllIssues, getIssueById } from './issue.service';
+import {
+  validateCreateIssueInput,
+  sanitizeCreateIssueInput,
+  parseGetIssuesQueryParams,
+  parseNumericId,
+  validateUpdateIssueInput,
+  sanitizeUpdateIssueInput,
+} from './issue.validation';
+import { createIssue, getAllIssues, getIssueById, updateIssue } from './issue.service';
 import { sendResponse } from '../../utils/sendResponse';
 import { AppError } from '../../errors/AppError';
 import { IIssue, IIssueWithReporter } from '../../interfaces/issue.interface';
+import { IAuthUser } from '../../interfaces/auth.interface';
 
 const create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -13,7 +21,7 @@ const create = async (req: Request, res: Response, next: NextFunction): Promise<
       throw new AppError(errors.map((e) => e.message).join(', '), StatusCodes.BAD_REQUEST);
     }
 
-    const reporterId = (req.user as { id: number }).id;
+    const reporterId = (req.user as IAuthUser).id;
     const input = sanitizeCreateIssueInput(req.body as Record<string, unknown>, reporterId);
     const issue = await createIssue(input);
 
@@ -50,4 +58,27 @@ const getOne = async (req: Request, res: Response, next: NextFunction): Promise<
   }
 };
 
-export const IssueController = { create, getAll, getOne };
+const update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const id = parseNumericId(rawId ?? '');
+    if (id === null) {
+      throw new AppError('Issue ID must be a positive integer', StatusCodes.BAD_REQUEST);
+    }
+
+    const errors = validateUpdateIssueInput(req.body as Record<string, unknown>);
+    if (errors.length > 0) {
+      throw new AppError(errors.map((e) => e.message).join(', '), StatusCodes.BAD_REQUEST);
+    }
+
+    const requestingUser = req.user as IAuthUser;
+    const input = sanitizeUpdateIssueInput(req.body as Record<string, unknown>);
+    const updatedIssue = await updateIssue(id, input, requestingUser);
+
+    sendResponse<IIssueWithReporter>(res, StatusCodes.OK, true, 'Issue updated successfully', updatedIssue);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const IssueController = { create, getAll, getOne, update };

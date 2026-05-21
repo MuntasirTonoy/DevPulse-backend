@@ -1,4 +1,12 @@
-import { ICreateIssueInput, IGetIssuesQueryParams, IIssue, IIssueWithReporter, IReporterPublic } from '../../interfaces/issue.interface';
+import {
+  ICreateIssueInput,
+  IGetIssuesQueryParams,
+  IIssue,
+  IIssueWithReporter,
+  IReporterPublic,
+  IUpdateIssueInput,
+} from '../../interfaces/issue.interface';
+import { IAuthUser } from '../../interfaces/auth.interface';
 import { query } from '../../config/queryHelper';
 import { AppError } from '../../errors/AppError';
 import { StatusCodes } from 'http-status-codes';
@@ -82,4 +90,74 @@ export const getIssueById = async (id: number): Promise<IIssueWithReporter> => {
   const reporter = reporterResult.rows[0] ?? null;
 
   return { ...issue, reporter };
+};
+
+export const updateIssue = async (
+  id: number,
+  input: IUpdateIssueInput,
+  requestingUser: IAuthUser,
+): Promise<IIssueWithReporter> => {
+  const issueResult = await query<IIssue>(ISSUE_QUERIES.GET_ISSUE_BY_ID, [id]);
+
+  if ((issueResult.rowCount ?? 0) === 0) {
+    throw new AppError('Issue not found', StatusCodes.NOT_FOUND);
+  }
+
+  const issue = issueResult.rows[0];
+
+  if (requestingUser.role === 'contributor') {
+    if (issue.reporter_id !== requestingUser.id) {
+      throw new AppError(
+        'You are not allowed to update this issue',
+        StatusCodes.FORBIDDEN,
+      );
+    }
+
+    if (issue.status !== 'open') {
+      throw new AppError(
+        'Contributors can only update issues with status open',
+        StatusCodes.CONFLICT,
+      );
+    }
+  }
+
+  const setClauses: string[] = [];
+  const params: unknown[] = [];
+  let paramIdx = 1;
+
+  if (input.title !== undefined) {
+    setClauses.push(`title = $${paramIdx++}`);
+    params.push(input.title);
+  }
+
+  if (input.description !== undefined) {
+    setClauses.push(`description = $${paramIdx++}`);
+    params.push(input.description);
+  }
+
+  if (input.type !== undefined) {
+    setClauses.push(`type = $${paramIdx++}`);
+    params.push(input.type);
+  }
+
+  setClauses.push(`updated_at = NOW()`);
+  params.push(id);
+
+  const updateSql = `
+    UPDATE issues
+    SET ${setClauses.join(', ')}
+    WHERE id = $${paramIdx}
+    RETURNING id, title, description, type, status, reporter_id, created_at, updated_at
+  `;
+
+  const updateResult = await query<IIssue>(updateSql, params);
+  const updatedIssue = updateResult.rows[0];
+
+  const reporterResult = await query<IReporterPublic>(ISSUE_QUERIES.GET_REPORTER_BY_ID, [
+    updatedIssue.reporter_id,
+  ]);
+
+  const reporter = reporterResult.rows[0] ?? null;
+
+  return { ...updatedIssue, reporter };
 };
