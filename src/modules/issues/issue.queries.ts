@@ -4,4 +4,10 @@ export const ISSUE_QUERIES = {
     VALUES ($1, $2, $3, 'open', $4)
     RETURNING id, title, description, type, status, reporter_id, created_at, updated_at
   `,
+
+  GET_REPORTERS_BY_IDS: `
+    SELECT id, name, role
+    FROM users
+    WHERE id = ANY($1)
+  `,
 } as const;

@@ -17,3 +17,19 @@ export interface ICreateIssueInput {
   type: IssueType;
   reporter_id: number;
 }
+
+export interface IReporterPublic {
+  id: number;
+  name: string;
+  role: string;
+}
+
+export interface IIssueWithReporter extends IIssue {
+  reporter: IReporterPublic | null;
+}
+
+export interface IGetIssuesQueryParams {
+  sort?: 'newest' | 'oldest';
+  type?: IssueType;
+  status?: IssueStatus;
+}

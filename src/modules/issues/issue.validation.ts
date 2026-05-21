@@ -1,5 +1,6 @@
 import { ICreateIssueInput } from '../../interfaces/issue.interface';
-import { ISSUE_TYPES, IssueType } from '../../constants/issue.constants';
+import { ISSUE_TYPES, IssueType, ISSUE_STATUSES, IssueStatus } from '../../constants/issue.constants';
+import { IGetIssuesQueryParams } from '../../interfaces/issue.interface';
 
 interface IValidationError {
   field: string;
@@ -39,3 +40,24 @@ export const sanitizeCreateIssueInput = (
   type: (body.type as string).trim() as IssueType,
   reporter_id: reporterId,
 });
+
+export const parseGetIssuesQueryParams = (rawQuery: Record<string, unknown>): IGetIssuesQueryParams => {
+  const params: IGetIssuesQueryParams = {};
+
+  const sort = rawQuery.sort;
+  if (sort === 'oldest' || sort === 'newest') {
+    params.sort = sort;
+  }
+
+  const type = rawQuery.type;
+  if (typeof type === 'string' && ISSUE_TYPES.includes(type.trim() as IssueType)) {
+    params.type = type.trim() as IssueType;
+  }
+
+  const status = rawQuery.status;
+  if (typeof status === 'string' && ISSUE_STATUSES.includes(status.trim() as IssueStatus)) {
+    params.status = status.trim() as IssueStatus;
+  }
+
+  return params;
+};

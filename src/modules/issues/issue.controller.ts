@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { validateCreateIssueInput, sanitizeCreateIssueInput } from './issue.validation';
-import { createIssue } from './issue.service';
+import { validateCreateIssueInput, sanitizeCreateIssueInput, parseGetIssuesQueryParams } from './issue.validation';
+import { createIssue, getAllIssues } from './issue.service';
 import { sendResponse } from '../../utils/sendResponse';
 import { AppError } from '../../errors/AppError';
-import { IIssue } from '../../interfaces/issue.interface';
+import { IIssue, IIssueWithReporter } from '../../interfaces/issue.interface';
 
 const create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -23,4 +23,15 @@ const create = async (req: Request, res: Response, next: NextFunction): Promise<
   }
 };
 
-export const IssueController = { create };
+const getAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const params = parseGetIssuesQueryParams(req.query as Record<string, unknown>);
+    const issues = await getAllIssues(params);
+
+    sendResponse<IIssueWithReporter[]>(res, StatusCodes.OK, true, 'Issues fetched successfully', issues);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const IssueController = { create, getAll };
