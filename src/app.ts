@@ -4,6 +4,7 @@ import { StatusCodes } from 'http-status-codes';
 import { AppError } from './errors/AppError';
 import { HealthRoutes } from './modules/health/health.route';
 import { AuthRoutes } from './modules/auth/auth.route';
+import { IssueRoutes } from './modules/issues/issue.route';
 
 const app: Application = express();
 
@@ -13,6 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/v1/health', HealthRoutes);
 app.use('/api/auth', AuthRoutes);
+app.use('/api/issues', IssueRoutes);
 
 app.use((req: Request, res: Response) => {
   res.status(StatusCodes.NOT_FOUND).json({
