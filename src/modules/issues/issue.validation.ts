@@ -61,3 +61,14 @@ export const parseGetIssuesQueryParams = (rawQuery: Record<string, unknown>): IG
 
   return params;
 };
+
+/**
+ * Parses a raw route param string into a positive integer.
+ * Returns null if the value is not a valid positive integer.
+ */
+export const parseNumericId = (raw: string): number | null => {
+  const trimmed = raw.trim();
+  const parsed = parseInt(trimmed, 10);
+  if (isNaN(parsed) || parsed <= 0 || String(parsed) !== trimmed) return null;
+  return parsed;
+};

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { validateCreateIssueInput, sanitizeCreateIssueInput, parseGetIssuesQueryParams } from './issue.validation';
-import { createIssue, getAllIssues } from './issue.service';
+import { validateCreateIssueInput, sanitizeCreateIssueInput, parseGetIssuesQueryParams, parseNumericId } from './issue.validation';
+import { createIssue, getAllIssues, getIssueById } from './issue.service';
 import { sendResponse } from '../../utils/sendResponse';
 import { AppError } from '../../errors/AppError';
 import { IIssue, IIssueWithReporter } from '../../interfaces/issue.interface';
@@ -34,4 +34,20 @@ const getAll = async (req: Request, res: Response, next: NextFunction): Promise<
   }
 };
 
-export const IssueController = { create, getAll };
+const getOne = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const id = parseNumericId(rawId ?? '');
+    if (id === null) {
+      throw new AppError('Issue ID must be a positive integer', StatusCodes.BAD_REQUEST);
+    }
+
+    const issue = await getIssueById(id);
+
+    sendResponse<IIssueWithReporter>(res, StatusCodes.OK, true, 'Issue fetched successfully', issue);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const IssueController = { create, getAll, getOne };

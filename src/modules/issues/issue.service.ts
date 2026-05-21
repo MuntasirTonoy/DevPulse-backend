@@ -1,5 +1,7 @@
 import { ICreateIssueInput, IGetIssuesQueryParams, IIssue, IIssueWithReporter, IReporterPublic } from '../../interfaces/issue.interface';
 import { query } from '../../config/queryHelper';
+import { AppError } from '../../errors/AppError';
+import { StatusCodes } from 'http-status-codes';
 import { ISSUE_QUERIES } from './issue.queries';
 
 export const createIssue = async (input: ICreateIssueInput): Promise<IIssue> => {
@@ -62,4 +64,22 @@ export const getAllIssues = async (params: IGetIssuesQueryParams): Promise<IIssu
     ...issue,
     reporter: reporterMap.get(issue.reporter_id) ?? null,
   }));
+};
+
+export const getIssueById = async (id: number): Promise<IIssueWithReporter> => {
+  const issueResult = await query<IIssue>(ISSUE_QUERIES.GET_ISSUE_BY_ID, [id]);
+
+  if ((issueResult.rowCount ?? 0) === 0) {
+    throw new AppError('Issue not found', StatusCodes.NOT_FOUND);
+  }
+
+  const issue = issueResult.rows[0];
+
+  const reporterResult = await query<IReporterPublic>(ISSUE_QUERIES.GET_REPORTER_BY_ID, [
+    issue.reporter_id,
+  ]);
+
+  const reporter = reporterResult.rows[0] ?? null;
+
+  return { ...issue, reporter };
 };
