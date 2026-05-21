@@ -1,4 +1,5 @@
-import jwt, { SignOptions } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+import type { StringValue } from 'ms';
 import { IJwtPayload } from '../interfaces/auth.interface';
 
 const getSecret = (): string => {
@@ -7,11 +8,10 @@ const getSecret = (): string => {
   return secret;
 };
 
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN ?? '1d';
+const JWT_EXPIRES_IN: StringValue = (process.env.JWT_EXPIRES_IN ?? '1d') as StringValue;
 
 export const signToken = (payload: IJwtPayload): string => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return jwt.sign(payload, getSecret(), { expiresIn: JWT_EXPIRES_IN as any });
+  return jwt.sign(payload, getSecret(), { expiresIn: JWT_EXPIRES_IN });
 };
 
 export const verifyToken = (token: string): IJwtPayload => {

@@ -10,7 +10,6 @@ export interface IUser {
   updated_at: Date;
 }
 
-/** Shape of data accepted from the request body */
 export interface ICreateUserInput {
   name: string;
   email: string;
@@ -18,7 +17,6 @@ export interface ICreateUserInput {
   role: UserRole;
 }
 
-/** What is returned to the client — password is intentionally excluded */
 export interface IUserPublic {
   id: number;
   name: string;

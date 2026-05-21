@@ -9,8 +9,7 @@ interface IDatabaseError extends Error {
   detail?: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const globalErrorHandler = (err: unknown, req: Request, res: Response, _next: NextFunction): void => {
+export const globalErrorHandler = (err: unknown, _req: Request, res: Response, _next: NextFunction): void => {
   let statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
   let message: string = ERROR_MESSAGES.INTERNAL_SERVER_ERROR;
   let errors: unknown = '';
