@@ -1,14 +1,11 @@
 {
   "compilerOptions": {
-    "rootDir": "./src",
+    "rootDir": "./",
     "outDir": "./dist",
     "module": "esnext",
     "target": "esnext",
     "types": ["node"],
     "moduleResolution": "bundler",
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "strict": true,
@@ -18,5 +15,5 @@
     "moduleDetection": "force",
     "skipLibCheck": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "api/**/*"]
 }
