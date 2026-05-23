@@ -22,6 +22,7 @@ export interface IUpdateIssueInput {
   title?: string;
   description?: string;
   type?: IssueType;
+  status?: IssueStatus;
 }
 
 export interface IReporterPublic {

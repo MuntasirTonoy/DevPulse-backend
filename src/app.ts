@@ -16,6 +16,14 @@ app.use('/api/v1/health', HealthRoutes);
 app.use('/api/auth', AuthRoutes);
 app.use('/api/issues', IssueRoutes);
 
+// Base route for the root endpoint
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Welcome to the DevPulse API!',
+  });
+});
+
 app.use(notFoundHandler);
 app.use(globalErrorHandler);
 

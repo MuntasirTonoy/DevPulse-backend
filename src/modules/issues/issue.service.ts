@@ -129,6 +129,13 @@ export const updateIssue = async (
         StatusCodes.CONFLICT,
       );
     }
+
+    if (input.status !== undefined) {
+      throw new AppError(
+        'Contributors are not allowed to update the status of an issue',
+        StatusCodes.FORBIDDEN,
+      );
+    }
   }
 
   const setClauses: string[] = [];
@@ -148,6 +155,11 @@ export const updateIssue = async (
   if (input.type !== undefined) {
     setClauses.push(`type = $${paramIdx++}`);
     params.push(input.type);
+  }
+
+  if (input.status !== undefined) {
+    setClauses.push(`status = $${paramIdx++}`);
+    params.push(input.status);
   }
 
   setClauses.push(`updated_at = NOW()`);
@@ -191,10 +203,8 @@ export const deleteIssue = async (id: number, requestingUser: IAuthUser): Promis
 
   const issue = issueResult.rows[0]!;
 
-  if (requestingUser.role === 'contributor') {
-    if (issue.reporter_id !== requestingUser.id) {
-      throw new AppError('You are not allowed to delete this issue', StatusCodes.FORBIDDEN);
-    }
+  if (requestingUser.role !== 'maintainer') {
+    throw new AppError('Only maintainers are allowed to delete issues', StatusCodes.FORBIDDEN);
   }
 
   await query(ISSUE_QUERIES.DELETE_ISSUE, [id]);

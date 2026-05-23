@@ -32,7 +32,7 @@ const getAll = catchAsync(async (req: Request, res: Response, _next: NextFunctio
   const params = parseGetIssuesQueryParams(req.query as Record<string, unknown>);
   const issues = await getAllIssues(params);
 
-  sendResponse<IIssueWithReporter[]>(res, StatusCodes.OK, true, 'Issues fetched successfully', issues);
+  sendResponse<IIssueWithReporter[]>(res, StatusCodes.OK, true, 'Issues retrived successfully', issues);
 });
 
 const getOne = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
@@ -44,7 +44,7 @@ const getOne = catchAsync(async (req: Request, res: Response, _next: NextFunctio
 
   const issue = await getIssueById(id);
 
-  sendResponse<IIssueWithReporter>(res, StatusCodes.OK, true, 'Issue fetched successfully', issue);
+  sendResponse<IIssueWithReporter>(res, StatusCodes.OK, true, 'Issue retrived successfully', issue);
 });
 
 const update = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {

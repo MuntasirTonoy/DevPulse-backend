@@ -47,11 +47,12 @@ export const validateUpdateIssueInput = (body: Record<string, unknown>): IValida
   const hasTitle = body.title !== undefined;
   const hasDescription = body.description !== undefined;
   const hasType = body.type !== undefined;
+  const hasStatus = body.status !== undefined;
 
-  if (!hasTitle && !hasDescription && !hasType) {
+  if (!hasTitle && !hasDescription && !hasType && !hasStatus) {
     errors.push({
       field: 'body',
-      message: 'At least one field (title, description, type) must be provided',
+      message: 'At least one field (title, description, type, status) must be provided',
     });
     return errors;
   }
@@ -81,6 +82,15 @@ export const validateUpdateIssueInput = (body: Record<string, unknown>): IValida
     }
   }
 
+  if (hasStatus) {
+    if (
+      typeof body.status !== 'string' ||
+      !ISSUE_STATUSES.includes(body.status.trim() as IssueStatus)
+    ) {
+      errors.push({ field: 'status', message: `Status must be one of: ${ISSUE_STATUSES.join(', ')}` });
+    }
+  }
+
   return errors;
 };
 
@@ -95,6 +105,9 @@ export const sanitizeUpdateIssueInput = (body: Record<string, unknown>): IUpdate
   }
   if (body.type !== undefined) {
     input.type = (body.type as string).trim() as IssueType;
+  }
+  if (body.status !== undefined) {
+    input.status = (body.status as string).trim() as IssueStatus;
   }
 
   return input;
